@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from . import serializers, filters
 from .permissions import IsAuthorAdminOrReadPermission
 from .pagination import PageLimitPagination
+from .utils import FavoriteCartMixin
 from recipes import models
 from users.models import CustomUser, Subscribe
 
@@ -118,7 +119,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, FavoriteCartMixin):
     queryset = models.Recipe.objects.all()
     permission_classes = [IsAuthorAdminOrReadPermission]
     pagination_class = PageLimitPagination
@@ -137,33 +138,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(models.Recipe, id=pk)
-        if request.method == 'POST':
-            if models.Cart.objects.filter(
-                owner=request.user,
-                recipe=recipe
-            ).exists():
-                return Response(
-                    {'errors': 'Этот рецепт уже в списке покупок!'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            serializer = serializers.CartSerializer(
-                data=request.data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(owner=request.user, recipe=recipe)
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        cart = models.Cart.objects.filter(
-                owner=request.user,
-                recipe=recipe
-        )
-        if cart.exists():
-            cart.delete()
-            return Response(status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'errors': 'Этого рецепта не было в списке покупок!'},
-            status.HTTP_400_BAD_REQUEST
+        return self.make_response(
+            request,
+            models.Cart,
+            serializers.CartSerializer,
+            pk
         )
 
     @action(
@@ -173,31 +152,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(models.Recipe, id=pk)
-        if request.method == 'POST':
-            if models.Favorite.objects.filter(
-                    owner=request.user,
-                    recipe=recipe
-            ).exists():
-                return Response(
-                    {'errors': 'Этот рецепт уже в избранном!'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            serializer = serializers.FavoriteSerializer(
-                data=request.data
-            )
-            serializer.save(owner=request.user, recipe=recipe)
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        cart = models.Cart.objects.filter(
-            owner=request.user,
-            recipe=recipe
-        )
-        if cart.exists():
-            cart.delete()
-            return Response(status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'errors': 'Этого рецепта не было в избранном!'},
-            status.HTTP_400_BAD_REQUEST
+     return self.make_response(
+            request,
+            models.Favorite,
+            serializers.FavoriteSerializer,
+            pk
         )
 
     @action(
