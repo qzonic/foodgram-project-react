@@ -11,7 +11,7 @@ class Tag(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} | {self.color} | {self.slug}'
 
 
 class Ingredient(models.Model):
@@ -19,7 +19,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} | {self.measurement_unit}'
 
 
 class RecipeIngredient(models.Model):
@@ -61,7 +61,7 @@ class Recipe(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return f'{self.name} | {self.author} | {self.cooking_time}'
 
 
 class Cart(models.Model):
@@ -76,7 +76,7 @@ class Cart(models.Model):
     )
 
     def __str__(self):
-        return f'{self.owner.username}|{self.recipe.name}'
+        return f'{self.owner.username} | {self.recipe.name}'
 
 
 class Favorite(models.Model):
@@ -91,4 +91,4 @@ class Favorite(models.Model):
     )
 
     def __str__(self):
-        return f'{self.owner.username}|{self.recipe.name}'
+        return f'{self.owner.username} | {self.recipe.name}'

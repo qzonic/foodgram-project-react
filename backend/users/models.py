@@ -8,7 +8,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=150)
 
     def __str__(self):
-        return self.username
+        return f'{self.username} | {self.first_name} {self.last_name}'
 
 
 class Subscribe(models.Model):
@@ -25,11 +25,3 @@ class Subscribe(models.Model):
 
     def __str__(self):
         return f'{self.user} | {self.following}'
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'following'],
-                name='unique_user_subscribers'
-            )
-        ]

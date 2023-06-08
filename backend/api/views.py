@@ -54,24 +54,27 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer(request.user).data, status.HTTP_200_OK)
 
     @action(
-        methods=['post', 'delete'],
+        methods=['post'],
         detail=True,
         url_path='subscribe',
         permission_classes=(permissions.IsAuthenticated,)
     )
     def subscribe(self, request, pk):
         user = get_object_or_404(CustomUser, id=pk)
-        if request.method == 'POST':
-            serializer = serializers.SubscribeSerializer(
-                data=request.data,
-                context={
-                    'request': request,
-                    'following': user
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user=request.user, following=user)
-            return Response(serializer.data, status.HTTP_201_CREATED)
+        serializer = serializers.SubscribeSerializer(
+            data=request.data,
+            context={
+                'request': request,
+                'following': user
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, following=user)
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, pk):
+        user = get_object_or_404(CustomUser, id=pk)
         subscribe = Subscribe.objects.filter(
             user=request.user,
             following=user
@@ -106,28 +109,26 @@ class UserViewSet(viewsets.ModelViewSet):
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Ingredient.objects.all()
     serializer_class = serializers.IngredientSerializer
-    permission_classes = [permissions.AllowAny]
-    pagination_class = None
-    filter_backends = [filters.IngredientSearchFilter]
+    permission_classes = (permissions.AllowAny,)
+    filter_backends = (filters.IngredientSearchFilter,)
     search_fields = ('^name',)
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
-    permission_classes = [permissions.AllowAny]
-    pagination_class = None
+    permission_classes = (permissions.AllowAny,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet, FavoriteCartMixin):
     queryset = models.Recipe.objects.all()
-    permission_classes = [IsAuthorAdminOrReadPermission]
+    permission_classes = (IsAuthorAdminOrReadPermission,)
     pagination_class = PageLimitPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = filters.RecipeFilterSet
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ('list', 'retrieve'):
             return serializers.RecipeReadSerializer
         return serializers.RecipeWriteSerializer
 
