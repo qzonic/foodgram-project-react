@@ -12,7 +12,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'web'
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -118,7 +122,8 @@ AUTH_USER_MODEL = "users.CustomUser"
 
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

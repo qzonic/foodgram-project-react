@@ -33,6 +33,6 @@ class FavoriteCartMixin:
             cart.delete()
             return Response(status.HTTP_204_NO_CONTENT)
         return Response(
-            {'errors': 'Этого обекта не было!'},
+            {'errors': 'Этого объекта не было!'},
             status.HTTP_400_BAD_REQUEST
         )
