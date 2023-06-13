@@ -15,7 +15,8 @@ DEBUG = os.getenv("DEBUG")
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'web'
+    'web',
+    '158.160.2.229'
 ]
 
 INSTALLED_APPS = [
